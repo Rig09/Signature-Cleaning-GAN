@@ -207,6 +207,16 @@ def define_D(input_nc, ndf, netD, n_layers_D=3, norm='batch', init_type='normal'
 ##############################################################################
 # Classes
 ##############################################################################
+class LkLoss(nn.Module):
+    """Class that defines the Lk loss function, the value of k is adjustable"""
+    def __init__(self, k):
+        super(LkLoss, self).__init__()
+        self.k = k
+    
+    def forward(self, predictions, targets):
+        return torch.mean((predictions - targets) ** self.k)
+
+
 class GANLoss(nn.Module):
     """Define different GAN objectives.
 
@@ -214,7 +224,7 @@ class GANLoss(nn.Module):
     that has the same size as the input.
     """
 
-    def __init__(self, gan_mode, target_real_label=1.0, target_fake_label=0.0):
+    def __init__(self, gan_mode,target_real_label=1.0, target_fake_label=0.0):
         """ Initialize the GANLoss class.
 
         Parameters:
@@ -233,6 +243,8 @@ class GANLoss(nn.Module):
             self.loss = nn.MSELoss()
         elif gan_mode == 'vanilla':
             self.loss = nn.BCEWithLogitsLoss()
+        elif gan_mode == 'lkgan':
+            self.loss = LkLoss(k=lk_loss_k)  # Use the passed k value here
         elif gan_mode in ['wgangp']:
             self.loss = None
         else:
@@ -265,7 +277,7 @@ class GANLoss(nn.Module):
         Returns:
             the calculated loss.
         """
-        if self.gan_mode in ['lsgan', 'vanilla']:
+        if self.gan_mode in ['lsgan', 'vanilla', 'lkgan']:
             target_tensor = self.get_target_tensor(prediction, target_is_real)
             loss = self.loss(prediction, target_tensor)
         elif self.gan_mode == 'wgangp':
