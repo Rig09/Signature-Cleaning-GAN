@@ -1,4 +1,4 @@
-#CycleGAN implementation for Signature Cleaning
+# CycleGAN implementation for Signature Cleaning
 
 The code in this project is implemented to clean signatures with bursty noise from signing on a document. This cleaning would allow existing signature fraud detection systems to have a superior performance on signatures in noisy environments.
 
